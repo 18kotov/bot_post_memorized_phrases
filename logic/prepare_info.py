@@ -27,6 +27,14 @@ def get_list_phrases(list_tuple: Union[List[tuple], None]) -> List[str]:
     return list_phrases
 
 
+def get_list_messages_day(x: int) -> List[dict]:
+    logger.debug('старт сбора списка фраз за день X')
+    list_tuple = get_phrases_x_days_ago(x)
+    list_dict = [tuple_to_dict(x) for x in list_tuple]
+    logger.debug('список фраз за день X собран')
+    return list_dict
+
+
 def tuple_to_dict(input: tuple) -> dict:
     phrases_dict = {'answer': input[1], 'ask': input[0]}
     return phrases_dict
