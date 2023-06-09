@@ -17,16 +17,15 @@ router = Router()
 
 
 @router.message(CommandStart(), F.from_user.id.in_(users))
-async def get_start(message: Message, bot):
+async def get_start(message: Message):
     logger.debug('Получена комманда start')
     await message.answer(f'Привет {message.from_user.first_name}. Начнем!')
-    chat_id = message.chat.id
-    list_message = get_list_messages_for_today()
-    await send_periodic_messages(bot, chat_id, list_message)
+    await message.answer(f'Посмотри список команд и запускай нужный режим.')
+
 
 @router.message(Command("all_days"), F.from_user.id.in_(users))
 async def get_start(message: Message, bot):
-    logger.debug('Получена комманда start')
+    logger.debug('Получена комманда all_days')
     await message.answer(f'Привет {message.from_user.first_name}. Начнем!')
     chat_id = message.chat.id
     list_message = get_list_messages_for_today()
@@ -131,10 +130,10 @@ async def send_messages_per_day(bot, chat_id, list_message):
     for message in list_message:
         ask = await bot.send_message(chat_id, message['ask'])
         logger.debug(f'send ask')
-        time.sleep(20)
+        time.sleep(10)
         answer = await bot.send_message(chat_id, message['answer'])
         logger.debug(f'send answer')
-        time.sleep(30)
+        time.sleep(10)
         await bot.delete_message(chat_id=chat_id, message_id=ask.message_id)
         logger.debug(f'delete ask')
         await bot.delete_message(chat_id=chat_id, message_id=answer.message_id)
