@@ -1,12 +1,16 @@
 import os
 import time
+from pathlib import Path
+
 from aiogram.types import Message
+from aiogram.types import FSInputFile
+from aiogram.methods.send_audio import SendAudio
 from aiogram import Router
 from aiogram import F
 from aiogram.filters import CommandStart, Command
 from logic.prepare_info import get_list_messages_for_today, get_quantity_phrases_repeat_today, get_list_messages_day
+from voice.get_voice import convert_text_to_speech
 from settings import get_logger
-
 
 logger = get_logger(__name__)
 
@@ -110,15 +114,23 @@ async def get_start(message: Message):
     logger.debug('Отправленно сообщение с количеством фраз')
 
 
+@router.message(Command("audio"), F.from_user.id.in_(users))
+async def get_start(message: Message, bot):
+    logger.debug('Получена команда audio')
+    list_message = get_list_messages_for_today()
+    chat_id = message.chat.id
+    await send_audio(bot, chat_id, list_message)
+
+
 async def send_periodic_messages(bot, chat_id, list_message):
     logger.debug(f'Длина списка фраз на сегодня: {len(list_message)}')
     for message in list_message:
         ask = await bot.send_message(chat_id, message['ask'])
         logger.debug(f'send ask')
-        time.sleep(60)
+        time.sleep(10)
         answer = await bot.send_message(chat_id, message['answer'])
         logger.debug(f'send answer')
-        time.sleep(300)
+        time.sleep(10)
         await bot.delete_message(chat_id=chat_id, message_id=ask.message_id)
         logger.debug(f'delete ask')
         await bot.delete_message(chat_id=chat_id, message_id=answer.message_id)
@@ -138,6 +150,19 @@ async def send_messages_per_day(bot, chat_id, list_message):
         logger.debug(f'delete ask')
         await bot.delete_message(chat_id=chat_id, message_id=answer.message_id)
         logger.debug(f'delete answer')
+
+
+async def send_audio(bot, chat_id, list_message):
+    logger.debug(f'Длина выбранного списка фраз: {len(list_message)}')
+    file_path = Path.cwd() / "voice/output.mp3"
+    for message in list_message:
+        convert_text_to_speech(message['ask'])
+        mp3 = FSInputFile(file_path)
+        # Send the image file to the specified chat ID
+        await bot.send_audio(chat_id, audio=mp3)
+        logger.debug(f'Отправили mp3 файл')
+        time.sleep(10)
+
 
 
 if __name__ == "__main__":

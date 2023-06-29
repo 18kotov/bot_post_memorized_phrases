@@ -12,7 +12,7 @@ RUN apk update && apk add tzdata && apk add postgresql-dev gcc python3-dev musl-
     pip install --upgrade pip && \
     pip install -U --pre aiogram && \
     apk del postgresql-dev gcc python3-dev musl-dev && \
-    pip install psycopg2-binary
+    pip install psycopg2-binary && pip install gtts
 
 
 CMD ["./run_bot_post_memorized_phrases.py"]
